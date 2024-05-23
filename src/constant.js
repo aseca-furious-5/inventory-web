@@ -1,0 +1,1 @@
+export const INVENTORY_API_URL = process.env.REACT_APP_INVENTORY_API_URL;
