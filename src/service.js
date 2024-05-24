@@ -21,3 +21,12 @@ export const adjustItemInventory = async (itemId, adjustment, reason) => {
         console.error("Error while adjusting item inventory", error);
     }
 }
+
+export const getAdjustmentsForItem = async (itemId) => {
+    try {
+        const response = await axios.get(`${INVENTORY_API_URL}/item/adjustments/${itemId}`);
+        return response.data;
+    } catch (error) {
+        console.error("Error while fetching adjustments", error);
+    }
+};

@@ -1,6 +1,6 @@
 import './App.css';
 import {useEffect, useState} from "react";
-import {adjustItemInventory, getAllItemInventories} from "./service";
+import {adjustItemInventory, getAdjustmentsForItem, getAllItemInventories} from "./service";
 
 function App() {
     // Initial state with a list of items
@@ -16,6 +16,8 @@ function App() {
     const [editItem, setEditItem] = useState(null);
     const [inputValue, setInputValue] = useState('');
     const [reason, setReason] = useState('');
+    const [showAdjustments, setShowAdjustments] = useState(null);
+    const [adjustments, setAdjustments] = useState([]);
 
     const handleEdit = (item) => {
         setEditItem(item);
@@ -30,8 +32,14 @@ function App() {
                 item.id === itemToSave.id ? {...item, quantity: item.quantity + newQuantity} : item
             ));
             setEditItem(null);
+            setShowAdjustments(null);
             await adjustItemInventory(itemToSave.itemId, newQuantity, reason);
         }
+    };
+
+    const handleShowAdjustments = async (id) => {
+        setShowAdjustments(showAdjustments === id ? null : id);
+        setAdjustments(await getAdjustmentsForItem(id));
     };
 
     return (
@@ -43,6 +51,9 @@ function App() {
                             <li key={item.id} style={{marginBottom: 40}}>
                                 {item.name} - Quantity: {item.quantity}
                                 <button style={{marginLeft: 10}} onClick={() => handleEdit(item)}>Update Quantity</button>
+                                <button onClick={() => handleShowAdjustments(item.id)}>
+                                    {showAdjustments === item.id ? 'Hide' : 'Show'} Adjustments
+                                </button>
                                 {editItem && editItem.id === item.id && (
                                     <div style={{marginTop: 10}}>
                                         <input
@@ -58,6 +69,15 @@ function App() {
                                         />
                                         <button onClick={() => handleSave(item)}>Save</button>
                                     </div>
+                                )}
+                                {showAdjustments === item.id && (
+                                    <ol>
+                                        {adjustments.map((adjustment, index) => (
+                                            <li key={index}>
+                                                Quantity Change: {adjustment.amount}, Reason: {adjustment.reason}
+                                            </li>
+                                        ))}
+                                    </ol>
                                 )}
                             </li>
                         ))
