@@ -1,23 +1,22 @@
 import './App.css';
-import {useEffect, useState} from "react";
-import {adjustItemInventory, getAdjustmentsForItem, getAllItemInventories} from "./service";
+import { useEffect, useState } from "react";
+import { adjustItemInventory, getAdjustmentsForItem, getAllItemInventories } from "./service";
 
 function App() {
-    // Initial state with a list of items
     const [items, setItems] = useState([]);
+    const [editItem, setEditItem] = useState(null);
+    const [inputValue, setInputValue] = useState('');
+    const [reason, setReason] = useState('');
+    const [showAdjustments, setShowAdjustments] = useState(null);
+    const [adjustments, setAdjustments] = useState([]);
+
+    const THRESHOLD = 10;
 
     useEffect(() => {
         getAllItemInventories().then((response) => {
             setItems(response);
         });
     }, []);
-
-    // State to manage the currently edited item and the input value
-    const [editItem, setEditItem] = useState(null);
-    const [inputValue, setInputValue] = useState('');
-    const [reason, setReason] = useState('');
-    const [showAdjustments, setShowAdjustments] = useState(null);
-    const [adjustments, setAdjustments] = useState([]);
 
     const handleEdit = (item) => {
         setEditItem(item);
@@ -29,7 +28,7 @@ function App() {
         const newQuantity = parseInt(inputValue, 10);
         if (!isNaN(newQuantity)) {
             setItems(items.map(item =>
-                item.id === itemToSave.id ? {...item, quantity: item.quantity + newQuantity} : item
+                item.id === itemToSave.id ? { ...item, quantity: item.quantity + newQuantity } : item
             ));
             setEditItem(null);
             setShowAdjustments(null);
@@ -44,18 +43,22 @@ function App() {
 
     return (
         <div className="App">
+            <header className="App-header">
+                <h1>Inventory App</h1>
+            </header>
             <div>
                 <h1>Item List</h1>
                 <ul>
                     {items && items.length !== 0 ? items.map(item => (
-                            <li key={item.id} style={{marginBottom: 40}}>
-                                {item.name} - Quantity: {item.quantity}
-                                <button style={{marginLeft: 10}} onClick={() => handleEdit(item)}>Update Quantity</button>
+                            <li key={item.id} style={{ marginBottom: 40 }}>
+                                {item.name} - Quantity: {item.quantity} {item.quantity < THRESHOLD && <span style={{ fontWeight: 'bold', position: 'absolute', right: '20px' }}> ⚠️ Low Stock</span>}
+                                <br></br>
+                                <button style={{ marginLeft: 10 }} onClick={() => handleEdit(item)}>Update Quantity</button>
                                 <button onClick={() => handleShowAdjustments(item.id)}>
                                     {showAdjustments === item.id ? 'Hide' : 'Show'} Adjustments
                                 </button>
                                 {editItem && editItem.id === item.id && (
-                                    <div style={{marginTop: 10}}>
+                                    <div style={{ marginTop: 10 }}>
                                         <input
                                             type="number"
                                             value={inputValue}
